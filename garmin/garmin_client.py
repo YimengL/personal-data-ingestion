@@ -1,7 +1,7 @@
 import os
 import sys
-from datetime import datetime, UTC
 import json
+from datetime import UTC, datetime
 
 from garminconnect import Garmin
 
