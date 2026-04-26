@@ -1,0 +1,8 @@
+name = "personal-data-ingestion-garmin"
+main = "worker.ts"
+compatibility_date = "2026-04-27"
+
+[[d1_databases]]
+binding = "PERSONAL_AI_DB"
+database_name = "personal-ai-db"
+database_id = "5670a5f2-df66-4bcf-9dd7-88a595bf10c6"
