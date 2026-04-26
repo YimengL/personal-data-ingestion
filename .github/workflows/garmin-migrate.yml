@@ -1,22 +1,20 @@
-name: Garmin Worker Deploy
+name: Garmin DB Migrate
 
 on:
-    push:
+    push: 
         branches: [main]
         paths:
-            - 'garmin/worker.ts'
-            - 'garmin/wrangler.toml'
+            - 'garmin/migrations/**'
 
 jobs:
-    deploy-worker:
+    migrate-db:
         runs-on: ubuntu-latest
         steps:
-            - name: Checkout
-              uses: actions/checkout@v6
-            - name: Publish Worker
-              uses: cloudflare/wrangler-action@v3
+            - uses: actions/checkout@v6
+            - uses: cloudflare/wrangler-action@v3
               with:
                 apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                 accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                 workingDirectory: garmin
                 wranglerVersion: "4"
+                command: d1 migrations apply PERSONAL_AI_DB --remote
