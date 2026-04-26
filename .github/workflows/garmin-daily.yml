@@ -1,0 +1,22 @@
+name: Garmin Daily Fetch
+
+on:
+    workflow_dispatch:
+    schedule:
+        - cron: '0 15 * * *'
+
+jobs:
+    fetch-garmin-data:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v6
+            - name: Build Garmin image
+              run: docker build -t garmin-client -f garmin/Dockerfile .
+            - name: Install Doppler CLI
+              uses: dopplerhq/cli-action@v3
+            - name: Run Garmin fetch
+              env:
+                DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+              shell: bash
+              run: docker run --rm --env-file <(doppler secrets download --no-file --format docker) garmin-client
