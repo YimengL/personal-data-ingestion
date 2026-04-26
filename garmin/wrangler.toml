@@ -1,6 +1,6 @@
 name = "personal-data-ingestion-garmin"
 main = "worker.ts"
-compatibility_date = "2026-04-27"
+compatibility_date = "2026-04-26"
 
 [[d1_databases]]
 binding = "PERSONAL_AI_DB"
