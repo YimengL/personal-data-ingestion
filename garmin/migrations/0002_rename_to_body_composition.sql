@@ -1,0 +1,3 @@
+ALTER TABLE garmin_weight RENAME TO garmin_body_composition;
+DROP INDEX idx_garmin_weight_measured_at;
+CREATE INDEX idx_garmin_body_composition_measured_at ON garmin_body_composition(measured_at);
