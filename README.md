@@ -55,6 +55,25 @@ docker build -t garmin-client -f garmin/Dockerfile .
 docker run --rm --env-file <(doppler secrets download --no-file --format docker) garmin-client
 ```
 
+## Garmin Worker
+
+The Garmin Worker accepts normalized body composition data and stores it in D1.
+
+### Endpoints
+
+- `POST /garmin/body-composition` — batch upsert of measurements
+- `GET /garmin/body-composition/latest` — returns the latest `measured_at` or `null`
+
+All endpoints require an `Authorization: Bearer <GARMIN_WORKER_TOKEN>` header.
+
+### Local dev
+
+```bash
+cd garmin
+npm install
+npx wrangler dev
+```
+
 ## GitHub Actions
 
 `.github/workflows/garmin-daily.yml` builds the Garmin Docker image and runs the
