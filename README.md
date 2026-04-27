@@ -15,25 +15,11 @@ belongs in `personal-ai-infra`.
 ## Garmin Weight
 
 The Garmin client authenticates with Garmin Connect using `garminconnect`,
-fetches today's weight entries, normalizes them, and prints JSON to stdout.
+fetches measurements from the last stored date to today using a watermark from the Worker,
+normalizes them, and POSTs the batch to the Garmin Worker.
 
-Output shape:
-
-```json
-[
-  {
-    "id": "example-measurement-id",
-    "measured_at": "2026-04-26T10:13:26.004000+00:00",
-    "weight_kg": 70.0
-  }
-]
-```
-
-If there is no weight entry for today, the output is:
-
-```json
-[]
-```
+If the database is empty, it fetches today only. If Garmin or GitHub Actions is down for
+several days, the next successful run catches up automatically.
 
 ## Local Run
 
@@ -41,6 +27,8 @@ Secrets are read from environment variables:
 
 - `GARMIN_EMAIL`
 - `GARMIN_PASSWORD`
+- `GARMIN_WORKER_URL`
+- `GARMIN_WORKER_TOKEN`
 
 Doppler is the preferred source of truth:
 
