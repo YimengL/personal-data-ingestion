@@ -1,0 +1,20 @@
+name: Tickers DB Migrate
+
+on:
+    push:
+        branches: [main]
+        paths:
+            - 'tickers/migrations/**'
+
+jobs:
+    migrate-db:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v6
+            - uses: cloudflare/wrangler-action@v3
+              with:
+                apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                workingDirectory: tickers
+                wranglerVersion: "4"
+                command: d1 migrations apply PERSONAL_AI_DB --remote
