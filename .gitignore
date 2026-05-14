@@ -4,3 +4,4 @@ node_modules/
 .venv/
 HANDOVER.md
 CLAUDE.md
+dist/
