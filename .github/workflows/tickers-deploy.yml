@@ -1,0 +1,32 @@
+name: Tickers Worker Deploy
+
+on:
+    push:
+        branches: [main]
+        paths:
+            - 'tickers/worker.ts'
+            - 'tickers/schema.ts'
+            - 'tickers/wrangler.toml'
+    
+jobs:
+    deploy-worker:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v6
+            - name: Install Doppler CLI
+              uses: dopplerhq/cli-action@v3
+            - name: Push secrets to Cloudflare
+              run: doppler secrets get TICKERS_WORKER_TOKEN --plain | npx wrangler secret put TICKERS_WORKER_TOKEN
+              working-directory: tickers
+              env:
+                DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+                CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+            - name: Publish Worker
+              uses: cloudflare/wrangler-action@v3
+              with:
+                apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                workingDirectory: tickers
+                wranglerVersion: "4"
