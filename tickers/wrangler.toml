@@ -1,4 +1,5 @@
 name = "personal-data-ingestion-tickers"
+main = "worker.ts"
 compatibility_date = "2026-05-10"
 
 [[d1_databases]]

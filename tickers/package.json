@@ -1,0 +1,11 @@
+{
+    "name": "personal-data-ingestion-tickers",
+    "private": true,
+    "dependencies": {
+        "drizzle-orm": "^0.45.2"
+    },
+    "devDependencies": {
+        "@cloudflare/workers-types": "^4.0.0",
+        "typescript": "^5.0.0"
+    }
+}
