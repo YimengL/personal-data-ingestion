@@ -1,0 +1,22 @@
+name: Tickers on Config Change
+
+on:
+    push:
+        branches: [main]
+        paths: ['tickers/watchlist.yaml']
+
+jobs:
+    reconcile-tickers:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v6
+            - name: Build Tickers image
+              run: docker build -t tickers-client -f tickers/Dockerfile .
+            - name: Install Doppler CLI
+              uses: dopplerhq/cli-action@v3
+            - name: Run Tickers reconcile
+              env:
+                DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+              shell: bash
+              run: docker run --rm --env-file <(doppler secrets download --no-file --format docker) tickers-client python tickers_client.py --reconcile
