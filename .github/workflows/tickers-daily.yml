@@ -1,0 +1,22 @@
+name: Tickers Daily Fetch
+
+on:
+    workflow_dispatch:
+    schedule:
+        - cron: '30 21 * * 1-5'
+
+jobs:
+    fetch-ticker-data:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v6
+            - name: Build Tickers image
+              run: docker build -t tickers-client -f tickers/Dockerfile .
+            - name: Install Doppler CLI
+              uses: dopplerhq/cli-action@v3
+            - name: Run Tickers fetch
+              env:
+                DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+              shell: bash
+              run: docker run --rm --env-file <(doppler secrets download --no-file --format docker) tickers-client

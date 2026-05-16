@@ -1,0 +1,2 @@
+mappings:
+  - { target: SXR8.DE, origin: SPY, type: equity_etf }
