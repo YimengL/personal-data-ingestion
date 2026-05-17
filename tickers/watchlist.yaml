@@ -1,2 +1,5 @@
 mappings:
   - { target: SXR8.DE, origin: SPY, type: equity_etf }
+  - { target: SXRV.DE, origin: QQQ, type: equity_etf }
+  - { target: VWCE.DE, origin: VT, type: equity_etf }
+  - { target: EXUS.DE, origin: VEA, type: equity_etf }
