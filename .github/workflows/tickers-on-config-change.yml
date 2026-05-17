@@ -1,6 +1,7 @@
 name: Tickers on Config Change
 
 on:
+    workflow_dispatch:
     push:
         branches: [main]
         paths: ['tickers/watchlist.yaml']
