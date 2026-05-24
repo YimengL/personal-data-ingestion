@@ -47,7 +47,7 @@ def load_watchlist():
     return mappings
 
 
-def fetch_and_post_metadata(ticker, asset_type):
+def fetch_and_post_metadata(ticker, asset_type, portfolio=False):
     info = yf.Ticker(ticker).info
     payload = [{
         "ticker": ticker,
@@ -56,6 +56,7 @@ def fetch_and_post_metadata(ticker, asset_type):
         "country": derive_country(info.get("exchange")),
         "currency": info.get("currency"),
         "long_name": info.get("longName"),
+        "portfolio": 1 if portfolio else 0,
     }]
     resp = requests.post(
         f"{WORKER_URL}/tickers/metadata",
@@ -121,14 +122,19 @@ def main():
 
     processed = set()
     for entry in mappings:
-        for ticker in (entry["origin"], entry["target"]):
+        tickers = [entry["target"]]
+        if "origin" in entry:
+            tickers.append(entry["origin"])
+        for ticker in tickers:
             if ticker in processed:
                 continue
             if ticker in existing:
                 logging.info(f"Skipping {ticker} (already exists)")
                 continue
+            is_portfolio = entry.get("portfolio", False) and ticker == entry["target"]
             if args.reconcile:
-                fetch_and_post_metadata(ticker, entry["type"])
+                # only applies to the target, ignore the original
+                fetch_and_post_metadata(ticker, entry["type"], is_portfolio)
             fetch_and_post_daily(ticker, date_str)
             processed.add(ticker)
     

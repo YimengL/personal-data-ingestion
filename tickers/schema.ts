@@ -1,4 +1,4 @@
-import { sqliteTable, text, real, primaryKey } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, real, primaryKey, integer } from "drizzle-orm/sqlite-core";
 
 export const equityEtfDaily = sqliteTable(
     "equity_etf_daily",
@@ -24,6 +24,7 @@ export const tickerMetadata = sqliteTable("ticker_metadata", {
     country: text("country"),
     currency: text("currency"),
     longName: text("long_name"),
+    portfolio: integer("portfolio").notNull().default(0),
     firstSeen: text("first_seen").notNull(),
     updatedAt: text("updated_at").notNull(),
 });

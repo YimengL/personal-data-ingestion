@@ -125,6 +125,7 @@ async function handlePostMetadata(request: Request, env: Env): Promise<Response>
                 country: row.country ?? null,
                 currency: row.currency ?? null,
                 longName: row.long_name ?? null,
+                portfolio: row.portfolio ?? 0,
                 firstSeen: now,
                 updatedAt: now,
             })
@@ -136,6 +137,7 @@ async function handlePostMetadata(request: Request, env: Env): Promise<Response>
                     country: row.country ?? null,
                     currency: row.currency ?? null,
                     longName: row.long_name ?? null,
+                    portfolio: row.portfolio ?? 0,
                     updatedAt: now,
                 },
             })
