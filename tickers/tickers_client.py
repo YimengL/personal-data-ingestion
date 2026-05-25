@@ -29,7 +29,7 @@ EXCHANGE_COUNTRY = {
     "NGM": "US",
 }
 
-VALID_TYPES = {"equity_etf", "gold_etc", "bond_etf", "stock"}
+VALID_TYPES = {"equity_etf", "gold_etc", "bond_etf", "stock", "money_fund"}
 WATCHLIST_PATH = os.path.join(os.path.dirname(__file__), "watchlist.yaml")
 
 
