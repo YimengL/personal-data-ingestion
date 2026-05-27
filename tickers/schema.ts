@@ -28,3 +28,16 @@ export const tickerMetadata = sqliteTable("ticker_metadata", {
     firstSeen: text("first_seen").notNull(),
     updatedAt: text("updated_at").notNull(),
 });
+
+export const portfolioSnapshots = sqliteTable(
+    "portfolio_snapshots",
+    {
+        ticker: text("ticker").notNull(),
+        date: text("date").notNull(),
+        value: real("value").notNull(),
+        currency: text("currency").notNull().default("EUR"),
+        monthlyContribution: real("monthly_contribution"),
+        createdAt: text("created_at").notNull(),
+    },
+    (t) => [primaryKey({ columns: [t.ticker, t.date] })]
+);
