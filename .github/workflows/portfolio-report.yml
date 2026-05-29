@@ -1,0 +1,21 @@
+name: Portfolio Report
+
+on:
+    workflow_dispatch:
+    schedule:
+        - cron: '0 18 1 * *'
+
+jobs:
+    generate-report:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v6
+            - name: Build report image
+              run: docker build -t portfolio-report -f tickers/Dockerfile.report .
+            - name: Install Doppler CLI
+              uses: dopplerhq/cli-action@v3
+            - name: Run portfolio report
+              env:
+                DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+              run: docker run --rm --env-file <(doppler secrets download --no-file --format docker) portfolio-report
