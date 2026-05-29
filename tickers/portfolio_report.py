@@ -70,6 +70,8 @@ def build_report(current, previous, metadata):
     curr_by_ticker = {r["ticker"]: r for r in current}
     prev_by_ticker = {r["ticker"]: r for r in previous}
 
+    cagrs = calculate_cagrs(metadata, curr_by_ticker)
+
     total_now = 0
     total_prev = 0
 
@@ -86,28 +88,38 @@ def build_report(current, previous, metadata):
             delta_str = f" ({fmt_delta(delta, pct)})"
         else:
             delta_str = " (new)"
-        
-        lines.append(f"• {ticker}: €{val:,.2f}{delta_str}")
 
-    lines.append(f"\n**Total: €{total_now:,.2f}**")
+        cagr_str = f"  [CAGR {cagrs[ticker]:.1%}]" if ticker in cagrs else ""
+        lines.append(f"• {ticker}: €{val:,.2f}{delta_str}{cagr_str}")
+
+    snapshot_date = current[0]["date"]
+    days_old = (datetime.now(timezone.utc) - datetime.strptime(snapshot_date, "%Y-%m-%d").replace(tzinfo=timezone.utc)).days
+    stale = " ⚠️ snapshot >30 days old, please update!" if days_old > 30 else ""
+    lines.append(f"\n**Total: €{total_now:,.2f}** (as of {snapshot_date}){stale}")
     if total_prev:
         total_delta = total_now - total_prev
         total_pct = (total_delta / total_prev * 100)
         lines.append(f"Change: {fmt_delta(total_delta, total_pct)}")
 
-    cagrs = calculate_cagrs(metadata, curr_by_ticker)
-    projected_total = 0
-    for ticker, row in curr_by_ticker.items():
-        val = row["value"]
-        monthly = row.get("monthlyContribution") or 0
-        if ticker in cagrs and cagrs[ticker] != 0:
-            r = cagrs[ticker] / 12
-            projected_total += val * (1 + r) ** 12 + monthly * ((1 + r) ** 12 - 1) / r
-        else:
-            projected_total += val + monthly * 12
+    def project(years):
+        months = years * 12
+        total = 0
+        for ticker, row in curr_by_ticker.items():
+            val = row["value"]
+            monthly = row.get("monthlyContribution") or 0
+            if ticker in cagrs and cagrs[ticker] != 0:
+                r = cagrs[ticker] / 12
+                total += val * (1 + r) ** months + monthly * ((1 + r) ** months - 1) / r
+            else:
+                total += val + monthly * months
+        return total
 
-    lines.append(f"\n**1yr projection: €{projected_total:,.2f}**")
-    lines.append(f"\n**4% rule:** €{total_now * 0.04 / 12:,.2f}/mo → €{projected_total * 0.04 / 12:,.2f}/mo (1yr)")
+    projected_1yr = project(1)
+    projected_10yr = project(10)
+
+    lines.append(f"\n**1yr projection: €{projected_1yr:,.2f}**")
+    lines.append(f"**10yr projection: €{projected_10yr:,.2f}**")
+    lines.append(f"\n**4% rule:** €{total_now * 0.04 / 12:,.2f}/mo → €{projected_1yr * 0.04 / 12:,.2f}/mo (1yr) → €{projected_10yr * 0.04 / 12:,.2f}/mo (10yr)")
 
     return "\n".join(lines)
 
