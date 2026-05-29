@@ -89,16 +89,17 @@ def build_report(current, previous, metadata):
         
         lines.append(f"• {ticker}: €{val:,.2f}{delta_str}")
 
+    lines.append(f"\n**Total: €{total_now:,.2f}**")
     if total_prev:
         total_delta = total_now - total_prev
         total_pct = (total_delta / total_prev * 100)
         lines.append(f"Change: {fmt_delta(total_delta, total_pct)}")
-    
+
     cagrs = calculate_cagrs(metadata, curr_by_ticker)
     projected_total = 0
     for ticker, row in curr_by_ticker.items():
         val = row["value"]
-        monthly = row.get("monthly_contribution") or 0
+        monthly = row.get("monthlyContribution") or 0
         if ticker in cagrs and cagrs[ticker] != 0:
             r = cagrs[ticker] / 12
             projected_total += val * (1 + r) ** 12 + monthly * ((1 + r) ** 12 - 1) / r
@@ -106,6 +107,7 @@ def build_report(current, previous, metadata):
             projected_total += val + monthly * 12
 
     lines.append(f"\n**1yr projection: €{projected_total:,.2f}**")
+    lines.append(f"\n**4% rule:** €{total_now * 0.04 / 12:,.2f}/mo → €{projected_total * 0.04 / 12:,.2f}/mo (1yr)")
 
     return "\n".join(lines)
 
