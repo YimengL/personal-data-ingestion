@@ -32,9 +32,10 @@ WHERE date = (SELECT MAX(date) FROM portfolio_snapshots)
 ORDER BY ticker
 ```
 
-### 4. Ask for values
+### 4. Ask for values — one by one
 
 **Tier 1 — Metadata positions (from step 2):**
+Ask ONE position at a time. Wait for the user's answer before moving to the next.
 For each position:
 - Show: `{ticker} ({long_name}) — last: €{prev_value}`
 - Ask for current value
@@ -43,7 +44,7 @@ For each position:
 
 **Tier 2 — Previous-only positions:**
 Find tickers in the latest snapshot (step 3) that are NOT in metadata results (step 2).
-For each:
+Ask ONE at a time:
 - Show: `{ticker} — last: €{prev_value} (not in watchlist)`
 - Ask: same value, update, or remove?
 - Default: carry forward previous value
@@ -52,19 +53,15 @@ For each:
 Ask: "Any new positions to add? (ticker and value, or skip)"
 
 ### 5. Confirm before saving
-Show a summary table of all positions to be saved:
-
-| Ticker | Value | Monthly | Source |
-|--------|-------|---------|--------|
-| SXR8.DE | €500 | €100 | metadata |
-| EUWAX | €45 | — | previous |
-
-Show breakdown and total:
+Show full breakdown and total:
 ```
-1. SXR8.DE (iShares Core S&P 500)  €500  monthly: €100
-2. EXUS.DE (Xtrackers World ex USA) €200  monthly: €50
-3. EUWAX                            €45
-Total: €745
+1. SXR8.DE (iShares Core S&P 500)     €581.10  monthly: €100
+2. VWCE.DE (Vanguard FTSE All-World)  €300.00  monthly: €50
+3. EXUS.DE (Xtrackers World ex USA)   €201.93  monthly: €50
+4. XEON.DE (Xtrackers EUR Overnight)  €15.03
+5. DE000EWG2LD7 (EUWAX Gold II)       €67.09
+6. EUWAX (not in watchlist)            €45.00
+Total: €1,210.15
 ```
 Ask: "Is this correct? (yes / number to edit / cancel)"
 - If number: update that position, then re-confirm

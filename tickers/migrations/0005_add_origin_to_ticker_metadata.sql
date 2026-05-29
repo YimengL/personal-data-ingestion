@@ -1,0 +1,1 @@
+ALTER TABLE ticker_metadata ADD COLUMN origin TEXT;

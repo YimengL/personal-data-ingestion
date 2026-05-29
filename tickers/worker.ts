@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/d1";
-import { eq } from "drizzle-orm";
-import { equityEtfDaily, tickerMetadata } from "./schema";
+import { eq, sql } from "drizzle-orm";
+import { equityEtfDaily, tickerMetadata, portfolioSnapshots } from "./schema";
 
 interface Env {
     PERSONAL_AI_DB: D1Database;
@@ -28,6 +28,18 @@ export default {
         // POST /tickers/metadata
         if (request.method === "POST" && url.pathname === "/tickers/metadata") {
             return handlePostMetadata(request, env);
+        }
+        // GET /tickers/metadata?portfolio=1
+        if (request.method === "GET" && url.pathname === "/tickers/metadata") {
+            return handleGetMetadata(url, env);
+        }
+        // GET /tickers/portfolio-snapshots
+        if (request.method === "GET" && url.pathname === "/tickers/portfolio-snapshots") {
+            return handleGetPortfolioSnapshots(url, env);
+        }
+        // GET /tickers/equity-etf-daily/price-range
+        if (request.method === "GET" && url.pathname === "/tickers/equity-etf-daily/price-range") {
+            return handleGetEquityPriceRange(url, env);
         }
 
         return new Response("Not Found", { status: 404 });
@@ -126,6 +138,7 @@ async function handlePostMetadata(request: Request, env: Env): Promise<Response>
                 currency: row.currency ?? null,
                 longName: row.long_name ?? null,
                 portfolio: row.portfolio ?? 0,
+                origin: row.origin ?? null,
                 firstSeen: now,
                 updatedAt: now,
             })
@@ -138,6 +151,7 @@ async function handlePostMetadata(request: Request, env: Env): Promise<Response>
                     currency: row.currency ?? null,
                     longName: row.long_name ?? null,
                     portfolio: row.portfolio ?? 0,
+                    origin: row.origin ?? null,
                     updatedAt: now,
                 },
             })
@@ -146,4 +160,84 @@ async function handlePostMetadata(request: Request, env: Env): Promise<Response>
     await db.batch(queries as any);
 
     return new Response("ok");   
+}
+
+
+async function handleGetPortfolioSnapshots(url: URL, env: Env): Promise<Response> {
+    const db = drizzle(env.PERSONAL_AI_DB);
+    const date = url.searchParams.get("date");
+
+    let targetDate: string;
+    if (date) {
+        const nearest = await db.select({ date: portfolioSnapshots.date })
+            .from(portfolioSnapshots)
+            .where(sql`date <= ${date}`)
+            .orderBy(sql`date DESC`)
+            .limit(1);
+        if (nearest.length === 0) {
+            return Response.json([]);
+        }
+        targetDate = nearest[0].date;
+    } else {
+        const latest = await db.select({ date: portfolioSnapshots.date })
+            .from(portfolioSnapshots)
+            .orderBy(sql`date DESC`)
+            .limit(1);
+
+        if (latest.length === 0) {
+            return Response.json([]);
+        }
+        targetDate = latest[0].date;
+    }
+
+    const rows = await db.select()
+        .from(portfolioSnapshots)
+        .where(eq(portfolioSnapshots.date, targetDate));
+    
+    return Response.json(rows);
+}
+
+
+async function handleGetEquityPriceRange(url: URL, env: Env): Promise<Response> {
+
+    const ticker = url.searchParams.get("ticker");
+    if (!ticker) {
+        return new Response("Missing ?ticker= param", { status: 400 });
+    }
+
+    const db = drizzle(env.PERSONAL_AI_DB);
+
+    const first = await db.select({ date: equityEtfDaily.date, price: equityEtfDaily.price })
+        .from(equityEtfDaily)
+        .where(eq(equityEtfDaily.ticker, ticker))
+        .orderBy(sql`date ASC`)
+        .limit(1);
+
+    const last = await db.select({ date: equityEtfDaily.date, price: equityEtfDaily.price })
+        .from(equityEtfDaily)
+        .where(eq(equityEtfDaily.ticker, ticker))
+        .orderBy(sql`date DESC`)
+        .limit(1);
+    
+    if (first.length === 0) {
+        return Response.json({ ticker, first: null, last: null });
+    }
+
+    return Response.json({ ticker, first: first[0], last: last[0]});
+}
+
+
+async function handleGetMetadata(url: URL, env: Env): Promise<Response> {
+    const db = drizzle(env.PERSONAL_AI_DB);
+    const portfolio = url.searchParams.get("portfolio");
+
+    let rows;
+    if (portfolio === "1") {
+        rows = await db.select().from(tickerMetadata).where(eq(tickerMetadata.portfolio, 1));
+    } else {
+        rows = await db.select().from(tickerMetadata);
+    }
+
+    return Response.json(rows);
+    
 }
