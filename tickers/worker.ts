@@ -29,6 +29,10 @@ export default {
         if (request.method === "POST" && url.pathname === "/tickers/metadata") {
             return handlePostMetadata(request, env);
         }
+        // GET /tickers/metadata?portfolio=1
+        if (request.method === "GET" && url.pathname === "/tickers/metadata") {
+            return handleGetMetadata(url, env);
+        }
         // GET /tickers/portfolio-snapshots
         if (request.method === "GET" && url.pathname === "/tickers/portfolio-snapshots") {
             return handleGetPortfolioSnapshots(url, env);
@@ -134,6 +138,7 @@ async function handlePostMetadata(request: Request, env: Env): Promise<Response>
                 currency: row.currency ?? null,
                 longName: row.long_name ?? null,
                 portfolio: row.portfolio ?? 0,
+                origin: row.origin ?? null,
                 firstSeen: now,
                 updatedAt: now,
             })
@@ -146,6 +151,7 @@ async function handlePostMetadata(request: Request, env: Env): Promise<Response>
                     currency: row.currency ?? null,
                     longName: row.long_name ?? null,
                     portfolio: row.portfolio ?? 0,
+                    origin: row.origin ?? null,
                     updatedAt: now,
                 },
             })
@@ -218,4 +224,20 @@ async function handleGetEquityPriceRange(url: URL, env: Env): Promise<Response> 
     }
 
     return Response.json({ ticker, first: first[0], last: last[0]});
+}
+
+
+async function handleGetMetadata(url: URL, env: Env): Promise<Response> {
+    const db = drizzle(env.PERSONAL_AI_DB);
+    const portfolio = url.searchParams.get("portfolio");
+
+    let rows;
+    if (portfolio === "1") {
+        rows = await db.select().from(tickerMetadata).where(eq(tickerMetadata.portfolio, 1));
+    } else {
+        rows = await db.select().from(tickerMetadata);
+    }
+
+    return Response.json(rows);
+    
 }

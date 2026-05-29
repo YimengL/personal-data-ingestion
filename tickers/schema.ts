@@ -25,6 +25,7 @@ export const tickerMetadata = sqliteTable("ticker_metadata", {
     currency: text("currency"),
     longName: text("long_name"),
     portfolio: integer("portfolio").notNull().default(0),
+    origin: text("origin"),
     firstSeen: text("first_seen").notNull(),
     updatedAt: text("updated_at").notNull(),
 });
