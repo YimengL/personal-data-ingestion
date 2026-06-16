@@ -1,8 +1,10 @@
 mappings:
   - { target: SXR8.DE, origin: SPY, type: equity_etf, portfolio: true }
+  - { target: SPYL.DE, origin: SPY, type: equity_etf, portfolio: true }
   - { target: SXRV.DE, origin: QQQ, type: equity_etf, portfolio: false }
+  - { target: XNAS.DE, origin: QQQ, type: equity_etf, portfolio: true }
   - { target: VWCE.DE, origin: VT, type: equity_etf, portfolio: true }
   - { target: EXUS.DE, origin: VEA, type: equity_etf, portfolio: true }
-  - { target: XEON.DE, type: money_fund, portfolio: true }
-  - { target: DE000EWG2LD7, type: gold_etc, portfolio: true }
-  - { target: IE00BFM6TC58, type: bond_etf, portfolio: true }
+  - { target: XEON.DE, type: money_fund, portfolio: false }
+  - { target: DE000EWG2LD7, type: gold_etc, portfolio: false }
+  - { target: IE00BFM6TC58, type: bond_etf, portfolio: false }
